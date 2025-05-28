@@ -4,7 +4,7 @@
     </x-slot>
 
     <div class="py-6 max-w-7xl mx-auto px-4">
-        <a href="{{ route('transactions.create') }}" class="mb-4 inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+        <a href="{{ route('transactions.create') }}" class="mb-4 inline-block bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">
             + Nauja transakcija
         </a>
 

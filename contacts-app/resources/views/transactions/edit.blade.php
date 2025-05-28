@@ -34,7 +34,7 @@
                 <textarea name="note" class="w-full border p-2 rounded">{{ old('note', $transaction->note) }}</textarea>
             </div>
 
-            <button class="bg-green-500 text-white px-4 py-2 rounded">Atnaujinti</button>
+            <button class="bg-green-500 text-black px-4 py-2 rounded">Atnaujinti</button>
         </form>
     </div>
 </x-app-layout>
