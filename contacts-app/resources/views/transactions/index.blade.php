@@ -4,10 +4,35 @@
     </x-slot>
 
     <div class="py-6 max-w-7xl mx-auto px-4">
+        {{-- Mėnesio ir metų pasirinkimas --}}
+        <form method="GET" action="{{ route('transactions.index') }}" class="mb-6 flex flex-wrap items-center gap-4">
+            <div>
+                <label for="year" class="block text-sm font-medium">Metai</label>
+                <select name="year" id="year" class="border p-2 rounded w-40 pr-8">
+                    @foreach ($years as $y)
+                        <option value="{{ $y }}" {{ $y == $selectedYear ? 'selected' : '' }}>{{ $y }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="month" class="block text-sm font-medium">Mėnuo</label>
+                <select name="month" id="month" class="border p-2 rounded w-40 pr-8">
+                    @foreach ($months as $num => $name)
+                        <option value="{{ $num }}" {{ $num == $selectedMonth ? 'selected' : '' }}>{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="self-end">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Filtruoti</button>
+            </div>
+        </form>
+
+        {{-- Nauja transakcija --}}
         <a href="{{ route('transactions.create') }}" class="mb-4 inline-block bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">
             + Nauja transakcija
         </a>
 
+        {{-- Transakcijų sąrašas --}}
         @if ($transactions->isEmpty())
             <p class="text-gray-600">Transakcijų nėra.</p>
         @else
@@ -41,20 +66,19 @@
                 </tbody>
             </table>
 
+            {{-- Apžvalga: pajamos, išlaidos, balansas --}}
             <div class="mt-6 p-4 bg-gray-100 rounded shadow max-w-md mx-auto text-center space-y-2">
                 <div>
-                    <strong>Šio mėnesio pajamos:</strong>
+                    <strong>{{ $selectedYear }} m. {{ $months[$selectedMonth] }} pajamos:</strong>
                     <span class="text-green-600 font-semibold text-lg">{{ number_format($totalIncomeThisMonth, 2) }} €</span>
                 </div>
                 <div>
-                    <strong>Šio mėnesio išlaidos:</strong>
+                    <strong>{{ $selectedYear }} m. {{ $months[$selectedMonth] }} išlaidos:</strong>
                     <span class="text-red-600 font-semibold text-lg">{{ number_format($totalExpensesThisMonth, 2) }} €</span>
                 </div>
                 <div>
-                    <strong>Bendra balansas:</strong>
-                    @php
-                        $balance = $totalIncomeThisMonth - $totalExpensesThisMonth;
-                    @endphp
+                    <strong>Balansas:</strong>
+                    @php $balance = $totalIncomeThisMonth - $totalExpensesThisMonth; @endphp
                     <span class="{{ $balance >= 0 ? 'text-green-700' : 'text-red-700' }} font-semibold text-lg">
                         {{ number_format($balance, 2) }} €
                     </span>

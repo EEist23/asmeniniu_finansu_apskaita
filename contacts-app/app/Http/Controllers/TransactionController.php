@@ -10,29 +10,51 @@ use Carbon\Carbon;
 
 class TransactionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $userId = Auth::id();
 
+        // Gauti pasirinktus metus ir mėnesį, arba naudoti dabartinius
+        $selectedYear = $request->input('year', now()->year);
+        $selectedMonth = $request->input('month', now()->month);
+
+        // Nustatyti mėnesio pradžią ir pabaigą
+        $startDate = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth();
+        $endDate = (clone $startDate)->endOfMonth();
+
+        // Gauti pasirinkto mėnesio transakcijas
         $transactions = Transaction::where('user_id', $userId)
             ->with('category')
-            ->latest()
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderByDesc('date')
             ->get();
 
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
+        // Pajamos, išlaidos, balansas
+        $totalIncomeThisMonth = $transactions->where('type', 'income')->sum('amount');
+        $totalExpensesThisMonth = $transactions->where('type', 'expense')->sum('amount');
+        $balance = $totalIncomeThisMonth - $totalExpensesThisMonth;
 
-        $totalIncomeThisMonth = Transaction::where('user_id', $userId)
-            ->where('type', 'income')
-            ->whereBetween('date', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
+        // Galimi metai pasirinkimui (pvz., paskutinių 5 metų intervalas)
+        $years = range(now()->year - 5, now()->year + 1);
 
-        $totalExpensesThisMonth = Transaction::where('user_id', $userId)
-            ->where('type', 'expense')
-            ->whereBetween('date', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
+        // Mėnesių sąrašas
+        $months = [
+            1 => 'Sausis', 2 => 'Vasaris', 3 => 'Kovas',
+            4 => 'Balandis', 5 => 'Gegužė', 6 => 'Birželis',
+            7 => 'Liepa', 8 => 'Rugpjūtis', 9 => 'Rugsėjis',
+            10 => 'Spalis', 11 => 'Lapkritis', 12 => 'Gruodis'
+        ];
 
-        return view('transactions.index', compact('transactions', 'totalIncomeThisMonth', 'totalExpensesThisMonth'));
+        return view('transactions.index', compact(
+            'transactions',
+            'totalIncomeThisMonth',
+            'totalExpensesThisMonth',
+            'balance',
+            'selectedYear',
+            'selectedMonth',
+            'years',
+            'months'
+        ));
     }
 
     public function create()
@@ -66,14 +88,12 @@ class TransactionController extends Controller
     public function show(Transaction $transaction)
     {
         $this->authorizeTransaction($transaction);
-
         return view('transactions.show', compact('transaction'));
     }
 
     public function edit(Transaction $transaction)
     {
         $this->authorizeTransaction($transaction);
-
         $categories = Category::where('user_id', Auth::id())->get();
         return view('transactions.edit', compact('transaction', 'categories'));
     }
