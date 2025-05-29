@@ -6,23 +6,40 @@ use App\Models\Transaction;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class TransactionController extends Controller
 {
-
     public function index()
     {
-        $transactions = Transaction::where('user_id', Auth::id())->with('category')->latest()->get();
-        return view('transactions.index', compact('transactions'));
-    }
+        $userId = Auth::id();
 
+        $transactions = Transaction::where('user_id', $userId)
+            ->with('category')
+            ->latest()
+            ->get();
+
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $totalIncomeThisMonth = Transaction::where('user_id', $userId)
+            ->where('type', 'income')
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        $totalExpensesThisMonth = Transaction::where('user_id', $userId)
+            ->where('type', 'expense')
+            ->whereBetween('date', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        return view('transactions.index', compact('transactions', 'totalIncomeThisMonth', 'totalExpensesThisMonth'));
+    }
 
     public function create()
     {
         $categories = Category::where('user_id', Auth::id())->get();
         return view('transactions.create', compact('categories'));
     }
-
 
     public function store(Request $request)
     {
@@ -46,7 +63,6 @@ class TransactionController extends Controller
         return redirect()->route('transactions.index')->with('success', 'Transakcija sėkmingai sukurta.');
     }
 
-
     public function show(Transaction $transaction)
     {
         $this->authorizeTransaction($transaction);
@@ -61,7 +77,6 @@ class TransactionController extends Controller
         $categories = Category::where('user_id', Auth::id())->get();
         return view('transactions.edit', compact('transaction', 'categories'));
     }
-
 
     public function update(Request $request, Transaction $transaction)
     {
@@ -80,7 +95,6 @@ class TransactionController extends Controller
         return redirect()->route('transactions.index')->with('success', 'Transakcija atnaujinta.');
     }
 
- 
     public function destroy(Transaction $transaction)
     {
         $this->authorizeTransaction($transaction);

@@ -40,6 +40,26 @@
                     @endforeach
                 </tbody>
             </table>
+
+            <div class="mt-6 p-4 bg-gray-100 rounded shadow max-w-md mx-auto text-center space-y-2">
+                <div>
+                    <strong>Šio mėnesio pajamos:</strong>
+                    <span class="text-green-600 font-semibold text-lg">{{ number_format($totalIncomeThisMonth, 2) }} €</span>
+                </div>
+                <div>
+                    <strong>Šio mėnesio išlaidos:</strong>
+                    <span class="text-red-600 font-semibold text-lg">{{ number_format($totalExpensesThisMonth, 2) }} €</span>
+                </div>
+                <div>
+                    <strong>Bendra balansas:</strong>
+                    @php
+                        $balance = $totalIncomeThisMonth - $totalExpensesThisMonth;
+                    @endphp
+                    <span class="{{ $balance >= 0 ? 'text-green-700' : 'text-red-700' }} font-semibold text-lg">
+                        {{ number_format($balance, 2) }} €
+                    </span>
+                </div>
+            </div>
         @endif
     </div>
 </x-app-layout>
