@@ -34,6 +34,17 @@
         <a href="{{ route('transactions.pdf', ['year' => $selectedYear, 'month' => $selectedMonth]) }}" target="_blank" class="mb-4 inline-block bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">
     Atspausdinti PDF
 </a>
+<form action="{{ route('transactions.email') }}" method="POST">
+    @csrf
+    <label for="email">Siųsti į el. paštą:</label>
+    <input type="email" name="email" id="email" required placeholder="Įveskite el. pašto adresą">
+    
+    <!-- Galbūt nori leisti rinktis metus ir mėnesį -->
+    <input type="hidden" name="year" value="{{ $selectedYear }}">
+    <input type="hidden" name="month" value="{{ $selectedMonth }}">
+    
+    <button type="submit">Siųsti ataskaitą</button>
+</form>
 
         {{-- Transakcijų sąrašas --}}
         @if ($transactions->isEmpty())

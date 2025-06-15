@@ -135,6 +135,51 @@ class TransactionController extends Controller
         $this->authorizeTransaction($transaction);
         return view('transactions.show', compact('transaction'));
     }
+   public function sendEmail(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'year' => 'nullable|integer',
+        'month' => 'nullable|integer',
+    ]);
+
+    $userId = Auth::id();
+
+    $selectedYear = $request->input('year', now()->year);
+    $selectedMonth = $request->input('month', now()->month);
+    $email = $request->input('email');
+
+    $startDate = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth();
+    $endDate = (clone $startDate)->endOfMonth();
+
+    $transactions = Transaction::where('user_id', $userId)
+        ->with('category')
+        ->whereBetween('date', [$startDate, $endDate])
+        ->orderByDesc('date')
+        ->get();
+
+    $totalIncomeThisMonth = $transactions->where('type', 'income')->sum('amount');
+    $totalExpensesThisMonth = $transactions->where('type', 'expense')->sum('amount');
+    $balance = $totalIncomeThisMonth - $totalExpensesThisMonth;
+
+    $pdf = PDF::loadView('transactions.pdf', [
+        'transactions' => $transactions,
+        'totalIncomeThisMonth' => $totalIncomeThisMonth,
+        'totalExpensesThisMonth' => $totalExpensesThisMonth,
+        'balance' => $balance,
+        'selectedYear' => $selectedYear,
+        'selectedMonth' => $selectedMonth,
+    ]);
+
+    \Mail::send([], [], function ($message) use ($email, $pdf, $selectedYear, $selectedMonth) {
+        $message->to($email)
+            ->subject("Transakcijų ataskaita už {$selectedYear}-{$selectedMonth}")
+            ->attachData($pdf->output(), "transactions_{$selectedYear}_{$selectedMonth}.pdf")
+            ->text('Pridedamas jūsų prašytas transakcijų PDF ataskaita.');
+    });
+
+    return redirect()->back()->with('success', 'PDF ataskaita išsiųsta į ' . $email);
+}
 
     public function edit(Transaction $transaction)
     {

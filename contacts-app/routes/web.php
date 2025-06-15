@@ -20,6 +20,7 @@ Route::middleware([
     })->name('dashboard');
 
     Route::resource('categories', CategoryController::class);
+Route::post('/transactions/email', [TransactionController::class, 'sendEmail'])->name('transactions.email');
    Route::get('/transactions/pdf', [TransactionController::class, 'exportPdf'])->name('transactions.pdf');
 Route::resource('transactions', TransactionController::class);
 });
