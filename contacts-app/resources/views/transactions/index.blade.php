@@ -23,13 +23,13 @@
                 </select>
             </div>
             <div class="self-end">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Filtruoti</button>
+                <button type="submit"  class="bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition ml-2">Filtruoti</button>
             </div>
         </form>
 
         {{-- Nauja transakcija --}}
         <a href="{{ route('transactions.create') }}" class="mb-4 inline-block bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">
-            + Nauja transakcija
+            Nauja transakcija
         </a>
         <a href="{{ route('transactions.pdf', ['year' => $selectedYear, 'month' => $selectedMonth]) }}" target="_blank" class="mb-4 inline-block bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">
     Atspausdinti PDF
@@ -43,7 +43,10 @@
     <input type="hidden" name="year" value="{{ $selectedYear }}">
     <input type="hidden" name="month" value="{{ $selectedMonth }}">
     
-    <button type="submit">Siųsti ataskaitą</button>
+    <button type="submit" 
+        class="bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition ml-2">
+        Siųsti ataskaitą
+    </button>
 </form>
 
         {{-- Transakcijų sąrašas --}}
