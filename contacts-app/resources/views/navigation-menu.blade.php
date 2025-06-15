@@ -12,14 +12,13 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ route('transactions.index') }}" :active="request()->routeIs('transactions.*')">
-    {{ __('Transakcijos') }}
-</x-nav-link>
-                    <x-nav-link href="{{ route('categories.index') }}" :active="request()->routeIs('categories.*')">
-    {{ __('Kategorijos') }}
-</x-nav-link>
+    <x-nav-link href="{{ url('/transactions') }}" :active="request()->is('transactions')">
+        {{ __('Transactions') }}
+    </x-nav-link>
 
-
+    <x-nav-link href="{{ url('/categories') }}" :active="request()->is('categories')">
+        {{ __('Categories') }}
+    </x-nav-link>
                 </div>
             </div>
 

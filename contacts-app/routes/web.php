@@ -20,5 +20,6 @@ Route::middleware([
     })->name('dashboard');
 
     Route::resource('categories', CategoryController::class);
-    Route::resource('transactions', TransactionController::class);
+   Route::get('/transactions/pdf', [TransactionController::class, 'exportPdf'])->name('transactions.pdf');
+Route::resource('transactions', TransactionController::class);
 });

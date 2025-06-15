@@ -7,6 +7,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use PDF; // pridėta PDF generavimui
 
 class TransactionController extends Controller
 {
@@ -35,7 +36,7 @@ class TransactionController extends Controller
         $balance = $totalIncomeThisMonth - $totalExpensesThisMonth;
 
         // Galimi metai pasirinkimui (pvz., paskutinių 5 metų intervalas)
-        $years = range(now()->year - 5, now()->year + 1);
+        $years = range(now()->year - 100, now()->year + 5);
 
         // Mėnesių sąrašas
         $months = [
@@ -57,9 +58,53 @@ class TransactionController extends Controller
         ));
     }
 
+    public function exportPdf(Request $request)
+    {
+        $userId = Auth::id();
+
+        // Gauti pasirinktus metus ir mėnesį, arba naudoti dabartinius
+        $selectedYear = $request->input('year', now()->year);
+        $selectedMonth = $request->input('month', now()->month);
+
+        // Nustatyti mėnesio pradžią ir pabaigą
+        $startDate = Carbon::create($selectedYear, $selectedMonth, 1)->startOfMonth();
+        $endDate = (clone $startDate)->endOfMonth();
+
+        // Gauti pasirinkto mėnesio transakcijas
+        $transactions = Transaction::where('user_id', $userId)
+            ->with('category')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->orderByDesc('date')
+            ->get();
+
+        // Pajamos, išlaidos, balansas
+        $totalIncomeThisMonth = $transactions->where('type', 'income')->sum('amount');
+        $totalExpensesThisMonth = $transactions->where('type', 'expense')->sum('amount');
+        $balance = $totalIncomeThisMonth - $totalExpensesThisMonth;
+
+        // Sukuriame PDF iš view
+        $pdf = PDF::loadView('transactions.pdf', [
+            'transactions' => $transactions,
+            'totalIncomeThisMonth' => $totalIncomeThisMonth,
+            'totalExpensesThisMonth' => $totalExpensesThisMonth,
+            'balance' => $balance,
+            'selectedYear' => $selectedYear,
+            'selectedMonth' => $selectedMonth,
+        ]);
+
+        // Atsisiųsti PDF failą
+        return $pdf->download("transactions_{$selectedYear}_{$selectedMonth}.pdf");
+    }
+
     public function create()
     {
-        $categories = Category::where('user_id', Auth::id())->get();
+        $userId = Auth::id();
+
+        $categories = Category::where(function ($query) use ($userId) {
+            $query->whereNull('user_id')
+                ->orWhere('user_id', $userId);
+        })->get();
+
         return view('transactions.create', compact('categories'));
     }
 

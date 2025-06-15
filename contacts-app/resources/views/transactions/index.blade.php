@@ -31,6 +31,9 @@
         <a href="{{ route('transactions.create') }}" class="mb-4 inline-block bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">
             + Nauja transakcija
         </a>
+        <a href="{{ route('transactions.pdf', ['year' => $selectedYear, 'month' => $selectedMonth]) }}" target="_blank" class="mb-4 inline-block bg-blue-600 text-black px-4 py-2 rounded hover:bg-blue-700 transition">
+    Atspausdinti PDF
+</a>
 
         {{-- Transakcijų sąrašas --}}
         @if ($transactions->isEmpty())
@@ -81,8 +84,12 @@
                     @php $balance = $totalIncomeThisMonth - $totalExpensesThisMonth; @endphp
                     <span class="{{ $balance >= 0 ? 'text-green-700' : 'text-red-700' }} font-semibold text-lg">
                         {{ number_format($balance, 2) }} €
+                        
                     </span>
                 </div>
+            </div>
+            <div>
+                
             </div>
         @endif
     </div>
