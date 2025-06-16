@@ -25,8 +25,17 @@
             </div>
 
             <div class="mb-4">
+                <label class="block">Tipas</label>
+                <select name="type" class="w-full border p-2 rounded" required>
+                    <option value="income" {{ $transaction->type === 'income' ? 'selected' : '' }}>Pajamos</option>
+                    <option value="expense" {{ $transaction->type === 'expense' ? 'selected' : '' }}>Išlaidos</option>
+                </select>
+            </div>
+
+            <div class="mb-4">
                 <label class="block">Data</label>
-                <input type="date" name="date" value="{{ old('date', $transaction->date) }}" class="w-full border p-2 rounded" required>
+               <input type="date" name="date" value="{{ old('date', $transaction->date) }}" class="w-full border p-2 rounded" required>
+
             </div>
 
             <div class="mb-4">
