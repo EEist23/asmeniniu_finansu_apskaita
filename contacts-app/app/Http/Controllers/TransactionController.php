@@ -24,14 +24,14 @@ class TransactionController extends Controller
         $endDate = (clone $startDate)->endOfMonth();
 
         // Gauti pasirinkto mėnesio transakcijas
-        $transactions = Transaction::where('user_id', $userId)
+        $transactions = Transaction::where('user_id', operator: $userId)
             ->with('category')
             ->whereBetween('date', [$startDate, $endDate])
             ->orderByDesc('date')
             ->get();
 
         // Pajamos, išlaidos, balansas
-        $totalIncomeThisMonth = $transactions->where('type', 'income')->sum('amount');
+        $totalIncomeThisMonth = $transactions->where('type', operator: 'income')->sum('amount');
         $totalExpensesThisMonth = $transactions->where('type', 'expense')->sum('amount');
         $balance = $totalIncomeThisMonth - $totalExpensesThisMonth;
 
